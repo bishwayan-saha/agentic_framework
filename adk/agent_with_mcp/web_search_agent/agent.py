@@ -37,7 +37,8 @@ async def create_web_search_agent():
             1. **Identify Topic:** Determine the specific topic or question the user wants information on.
             2. **Call Discovered Tool:** You **MUST** look for and call the available tools with the identified topic.
             3. **Present Results:** The tool will return a raw text string containing the web search results. 
-                     You will format the text in hearders, paragraphs, bullet points to look more readable.
+                     You will format the text in hearders, paragraphs, bullet points and add some emojis. 
+                     *You will also add a disclaimer that the information is not verified and should be used with caution.*
             4. **Handle Missing Tool:** If you cannot find the required web search tool, inform the user that you cannot search the web due to a configuration issue.
             5. **Do Not Hallucinate:** Only provide information returned by the tool.
         """
@@ -46,6 +47,6 @@ async def create_web_search_agent():
         tools=tools
     )
 
-    return agent
+    return agent, exit_stack
 
 root_agent = create_web_search_agent()

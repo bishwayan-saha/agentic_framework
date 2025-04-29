@@ -34,20 +34,20 @@ async def fetch_url(url: str):
             return text
         except Exception as e:
             print(e)
-            return None
+            return ""
         
 @mcp.tool()
 async def search_web_tool(query: str):
 
     """
-        Search the web for documentation for a given query and library
-        Supported libraries are langchain and llama-index.
+        Search the web for information for a given query. The query can be related to any topic.
+        With the help of Serper, you first fetch the relevant URLs.
+        Then you fetch the content of the URLs and return the formatted text.
 
         Args:
-            query: The query to search for basically a topic
-            library: The library in which to search
+            query: The query to search for basically a topic.
         Returns:
-            The text from the documentation for the given query and library
+            The text from the all URL contents for the given query.
     """
 
     search_res = await search_web(query)
