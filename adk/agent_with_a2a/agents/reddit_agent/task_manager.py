@@ -7,6 +7,7 @@ from server.task_manager import InMemoryTaskManager
 from models.request import SendTaskRequest, SendTaskResponse
 from models.task import Message, TextPart, TaskStatus
 
+
 class AgentTaskManager(InMemoryTaskManager):
     """
     This class connects the agent to task system.
@@ -32,24 +33,23 @@ class AgentTaskManager(InMemoryTaskManager):
     # Main logic to handle and execute a task
     async def on_send_task(self, request: SendTaskRequest) -> SendTaskResponse:
         """
-            1. Save or update the task into memory
-            2. Ask the agent for a response
-            3. Fornat the reply as a message object
-            4. Save this response into task history
-            5. Return the updated task to the user/caller
+        1. Save or update the task into memory
+        2. Ask the agent for a response
+        3. Fornat the reply as a message object
+        4. Save this response into task history
+        5. Return the updated task to the user/caller
         """
 
         # 1. Save or update the task into memory
         task = await self.upsert_task(request.params)
 
         # 2. Ask the agent for a response
-        response_text = self.agent.invoke(self._get_user_query(request), request.params.session_id)
+        response_text = self.agent.invoke(
+            self._get_user_query(request), request.params.session_id
+        )
 
         # 3. Format the reply as a message object
-        agent_response = Message(
-            role="agent",
-            parts=[TextPart(text=response_text)]
-        )
+        agent_response = Message(role="agent", parts=[TextPart(text=response_text)])
 
         # 4. Save this response into task history
         async with self.lock:

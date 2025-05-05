@@ -36,7 +36,7 @@ class A2AServer:
         task_manager: task_manager = None,
     ):
         """
-        🔧 Constructor for our A2AServer
+        Constructor for our A2AServer
 
         Args:
             host: IP address to bind the server to (default is all interfaces)
@@ -87,16 +87,16 @@ class A2AServer:
         """
         handles task requests sent to the root path ("/").
 
-        - Parses incoming JSON
-        - Validates the JSON-RPC message
-        - For supported task types, delegates to the task manager
-        - Returns a response or error
+        - 1. Parses incoming JSON
+        - 2. Validates the JSON-RPC message
+        - 3. For supported task types, delegates to the task manager
+        - 4. Returns a response or error
         """
         try:
             # Step 1: Parse incoming JSON body
             body = await request.json()
             print(
-                "\n🔍 Incoming JSON:", json.dumps(body, indent=2)
+                "\nIncoming JSON:\n", json.dumps(body, indent=2)
             )  # Log input for visibility
 
             # Step 2: Parse and validate request using discriminated union

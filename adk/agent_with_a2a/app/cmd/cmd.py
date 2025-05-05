@@ -1,7 +1,5 @@
 # =============================================================================
-# cmd.py
-# =============================================================================
-# Purpose:
+
 # This file is a command-line interface (CLI) that lets users interact with
 # the TellTimeAgent running on an A2A server.
 #
@@ -14,31 +12,41 @@
 # - optional task history printing
 # =============================================================================
 
-import asyncclick as click        # click is a CLI tool; asyncclick supports async functions
-import asyncio                    # Built-in Python module to run async event loops
-from uuid import uuid4            # Used to generate unique task and session IDs
-
-# Import the A2AClient from your client module (it handles request/response logic)
+import asyncclick as click
+import asyncio
+from uuid import uuid4
 from client.client import A2AClient
-
-# Import the Task model so we can handle and parse responses from the agent
 from models.task import Task
+
+
+YELLOW = "\033[1;33m"
+RESET = "\033[0m"
+PURPLE = "\033[0;35m"
+BOLD = "\033[1m"
+RED = "\033[0;31m"
 
 
 # -----------------------------------------------------------------------------
 # @click.command(): Turns the function below into a command-line command
 # -----------------------------------------------------------------------------
 @click.command()
-@click.option("--agent", default="http://localhost:10002", help="Base URL of the A2A agent server")
+@click.option(
+    "--agent", default="http://localhost:10002", help="Base URL of the A2A agent server"
+)
 # ^ This defines the --agent option. It's a string with a default of localhost:10002
 # ^ Used to point to the running agent server (adjust if server runs elsewhere)
+
 
 @click.option("--session", default=0, help="Session ID (use 0 to generate a new one)")
 # ^ This defines the --session option. A session groups multiple tasks together.
 # ^ If user passes 0, we generate a random session ID using uuid4.
 
-@click.option("--history", is_flag=True, help="Print full task history after receiving a response")
+
+@click.option(
+    "--history", is_flag=True, help="Print full task history after receiving a response"
+)
 # ^ This defines a --history flag (boolean). If passed, full conversation history is shown.
+
 
 async def cli(agent: str, session: str, history: bool):
     """
@@ -59,9 +67,10 @@ async def cli(agent: str, session: str, history: bool):
     # Start the main input loop
     while True:
         # Prompt user for input
-        prompt = click.prompt("\nWhat do you want to send to the agent? (type ':q' or 'quit' to exit)")
+        prompt = click.prompt(
+            f"\n{RED}Press 'q' or type 'quit' to exit{RESET}\n{BOLD}{YELLOW}User{RESET}: "
+        )
 
-        # Exit loop if user types ':q' or 'quit'
         if prompt.strip().lower() in [":q", "quit"]:
             break
 
@@ -71,8 +80,10 @@ async def cli(agent: str, session: str, history: bool):
             "sessionId": session_id,  # Reuse or create session ID
             "message": {
                 "role": "user",  # The message is from the user
-                "parts": [{"type": "text", "text": prompt}]  # Wrap user input in a text part
-            }
+                "parts": [
+                    {"type": "text", "text": prompt}
+                ],  # Wrap user input in a text part
+            },
         }
 
         try:
@@ -82,7 +93,7 @@ async def cli(agent: str, session: str, history: bool):
             # Check if the agent responded (expecting at least 2 messages: user + agent)
             if task.history and len(task.history) > 1:
                 reply = task.history[-1]  # Last message is usually from the agent
-                print("\nAgent says:", reply.parts[0].text)  # Print agent's text reply
+                print(f"\n{BOLD}{PURPLE}Agent{RESET}:", reply.parts[0].text)  # Print agent's text reply
             else:
                 print("\nNo response received.")
 
@@ -90,17 +101,14 @@ async def cli(agent: str, session: str, history: bool):
             if history:
                 print("\n========= Conversation History =========")
                 for msg in task.history:
-                    print(f"[{msg.role}] {msg.parts[0].text}")  # Show each message in sequence
+                    print(
+                        f"[{msg.role}] {msg.parts[0].text}"
+                    )  # Show each message in sequence
 
         except Exception as e:
             # Catch and print any errors (e.g., server not running, invalid response)
-            print(f"\n❌ Error while sending task: {e}")
+            print(f"\nError while sending task: {e}")
 
-
-# -----------------------------------------------------------------------------
-# Entrypoint: This ensures the CLI only runs when executing `python cmd.py`
-# -----------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    # Run the async `cli()` function inside the event loop
     asyncio.run(cli())

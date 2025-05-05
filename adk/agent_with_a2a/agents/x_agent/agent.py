@@ -8,58 +8,59 @@ from google.adk.sessions import InMemorySessionService
 from google.genai import types
 from dotenv import load_dotenv
 from google.adk.runners import Runner
-import praw
+import tweepy
 import os
 
 load_dotenv()
 
 
-def get_reddit_news(subreddit: str, limit: int = 3) -> dict[str, list[str]]:
+def get_x_tweet_posts(handle_name: str, limit: int = 3) -> dict[str, list[str]]:
     """
-    Fetches top post titles from a specified subreddit using the Reddit API.
+    Fetches top post titles from a specified x handle using the X API.
 
     Args:
-        subreddit: The name of the subreddit to fetch news from.
+        handle_name: The name of the X handle to fetch posts from.
         limit: The maximum number of top posts to fetch.
 
     Returns:
-        A dictionary with the subreddit name as key and a list of
+        A dictionary with the X handlename as key and a list of
         post titles as value. Returns an error message if credentials are
-        missing, the subreddit is invalid, or an API error occurs.
+        missing, the handlename is invalid, or an API error occurs.
     """
 
-    client_id = os.getenv("REDDIT_CLIENT_ID")
-    client_secret = os.getenv("REDDIT_CLIENT_SECRET")
-    user_agent = os.getenv("REDDIT_USER_AGENT")
+    # x_client = tweepy.Client(
+    #     bearer_token=os.getenv("X_BEARER_TOKEN"),
+    #     consumer_key=os.getenv("X_CONSUMER_API_KEY"),
+    #     consumer_secret=os.getenv("X_CONSUMER_API_SECRET"),
+    #     access_token=os.getenv("X_ACCESS_TOKEN"),
+    #     access_token_secret=os.getenv("X_ACCESS_TOKEN_SECRET"),
+    # )
+
+    auth = tweepy.OAuthHandler(
+        os.getenv("X_CONSUMER_API_KEY"), os.getenv("X_CONSUMER_API_SECRET")
+    )
+    auth.set_access_token(os.getenv("X_ACCESS_TOKEN"), os.getenv("X_ACCESS_TOKEN_SECRET"))
+    x_client = tweepy.API(auth)
 
     try:
-        reddit = praw.Reddit(
-            client_id=client_id, client_secret=client_secret, user_agent=user_agent
-        )
-        sub_reddit = reddit.subreddit(subreddit)
-        posts = list(sub_reddit.hot(limit=limit))
-        titles = [post.title for post in posts]
-        return {subreddit: titles}
+        tweets = x_client.user_timeline(screen_name=handle_name, count=limit)
+        titles = [tweet.full_text for tweet in tweets]
+        return {handle_name: titles}
     except Exception as e:
-        print(f"--- Tool error: Unexpected error for r/{subreddit}: {e} ---")
-        return {
-            subreddit: [
-                f"An unexpected error occurred while fetching from r/{subreddit}."
-            ]
-        }
+        print(f"--- Tool error: Unexpected error for {handle_name}: {e} ---")
+        return {handle_name: [f"An unexpected error occurred while fetching from {handle_name}."]}
 
-
-class RedditAgent:
+class XAgent:
 
     SUPPORTED_CONTENT_TYPES = ["text", "text/plain"]
 
     def __init__(self):
         """
-        Initialize the RedditAgent.
+        Initialize the XAgent.
         Sets up session handling, memory and runner to execute task
         """
         self._agent = self._build_agent()
-        self._user_id = "remote_reddit_agent"
+        self._user_id = "remote_x_twitter_agent"
         ## Runner is used to manage the agent and its environment
         self._runner = Runner(
             app_name=self._agent.name,
@@ -73,28 +74,28 @@ class RedditAgent:
         """Creates and returns an LlmAgent instance"""
         return LlmAgent(
             model="gemini-1.5-flash",
-            name="reddit_agent",
+            name="x_twitter_agent",
             description="""A specialized Reddit agent that searches for relevant posts on a given subreddit.""",
             instruction="""
-                You are the Reddit News Scout. Your primary task is to fetch new posts from a given subreddit.
-                1. **Identify Intent:** Determine if the user is asking for any subreddit  news or related topics.
-                2. **Determine Subreddit:** Identify which subreddit(s) to check. If none specified, prompt the user to enter'.
+                You are the X tweets explorer. Your primary task is to fetch new posts from a given X-handle.
+                1. **Identify Intent:** Determine if the user is asking for any X posts/tweets or related topics.
+                2. **Determine Subreddit:** Identify which X handle to check. If none specified, prompt the user to enter the handle name'.
                 3. **Synthesize Output:** Take the exact list of titles returned by the tool.
-                4. **Format Response:** Present the information as a concise, bulleted list. Clearly state which subreddit(s) the information came from. 
-                        If the tool indicates an error or an unknown subreddit, report that message directly.
-                5. **MUST CALL TOOL:** You **MUST** call the `get_reddit_news` tool with the identified subreddit(s).
+                4. **Format Response:** Present the information as a concise, bulleted list. Clearly state which X user handle the information came from. 
+                        If the tool indicates an error or an unknown handle, report that message directly.
+                5. **MUST CALL TOOL:** You **MUST** call the `get_x_tweet_posts` tool with the identified X handle.
                         DO NOT generate random summaries without calling the tool first.""",
-            tools=[get_reddit_news],
+            tools=[get_x_tweet_posts],
         )
 
     def invoke(self, query: str, session_id: str) -> str:
         """
-        Receives a user query about subreddit news and returns a response
+        Receives a user query about X user posts and returns a response
         Args:
             query (str): The query to be processed
             session_id (str): The session ID for context of grouping messages
         Returns:
-            str: The response (subreddit posts) from the agent
+            str: The response (X tweets) from the agent
         """
         session = self._runner.session_service.get_session(
             app_name=self._agent.name, user_id=self._user_id, session_id=session_id

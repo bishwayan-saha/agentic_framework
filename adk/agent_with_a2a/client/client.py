@@ -31,7 +31,7 @@ class A2AClient:
             params = TaskSendParams(**payload)
         )
 
-        print("\nSending JSON RPC request\n")
+        print("\n----- Sending JSON RPC request -----\n")
         
 
         response = await self._send_request(request)

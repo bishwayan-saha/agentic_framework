@@ -33,25 +33,25 @@ class TaskManager(ABC):
 
     @abstractmethod
     async def on_send_task(self, request: SendTaskRequest) -> SendTaskResponse:
-        """📥 This method will handle new incoming tasks."""
+        """ This method will handle new incoming tasks."""
         pass
 
     @abstractmethod
     async def on_get_task(self, request: GetTaskRequest) -> GetTaskResponse:
-        """📤 This method will return task details by task ID."""
+        """ This method will return task details by task ID."""
         pass
 
 
 class InMemoryTaskManager(TaskManager):
     """
-    🧠 A simple, temporary task manager that stores everything in memory (RAM).
+    A simple, temporary task manager that stores everything in memory (RAM).
 
     Great for:
     - Demos
     - Local development
     - Single-session interactions
 
-    ❗ Not for production: Data is lost when the app stops or restarts.
+    Not for production: Data is lost when the app stops or restarts.
     """
 
     def __init__(self):
