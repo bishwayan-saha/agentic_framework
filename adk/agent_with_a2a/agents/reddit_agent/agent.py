@@ -72,7 +72,7 @@ class RedditAgent:
     def _build_agent(self) -> LlmAgent:
         """Creates and returns an LlmAgent instance"""
         return LlmAgent(
-            model="gemini-1.5-flash",
+            model="gemini-2.0-flash",
             name="reddit_agent",
             description="""A specialized Reddit agent that searches for relevant posts on a given subreddit.""",
             instruction="""

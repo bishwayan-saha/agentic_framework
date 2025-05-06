@@ -10,7 +10,7 @@ from starlette.requests import Request
 from models.agent import AgentCard
 from models.request import A2ARequest, SendTaskRequest
 from models.json_rpc import JSONRPCResponse, InternalError
-from agents.reddit_agent import task_manager
+from server.task_manager import TaskManager
 import json
 from datetime import datetime
 from fastapi.encoders import jsonable_encoder
@@ -33,7 +33,7 @@ class A2AServer:
         host="0.0.0.0",
         port=5000,
         agent_card: AgentCard = None,
-        task_manager: task_manager = None,
+        task_manager: TaskManager = None,
     ):
         """
         Constructor for our A2AServer
