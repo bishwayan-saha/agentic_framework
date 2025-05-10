@@ -2,20 +2,20 @@
 ## - Receives a task from the user
 ## - Ask the agent to respond
 ## - Return the response to the user
-from agents.reddit_agent.agent import RedditAgent
+from agents.search_agent.agent import SearchAgent
 from server.task_manager import InMemoryTaskManager
 from models.request import SendTaskRequest, SendTaskResponse
 from models.task import Message, TextPart, TaskStatus
 
 
-class RedditAgentTaskManager(InMemoryTaskManager):
+class SearchAgentTaskManager(InMemoryTaskManager):
     """
     This class connects the agent to task system.
     - It inherits all the logics from 'InMemoryTaskManager'
     - It also implements the on_send_task method which is used to handle a new task
     """
 
-    def __init__(self, agent: RedditAgent):
+    def __init__(self, agent: SearchAgent):
         super().__init__()
         self.agent = agent
 

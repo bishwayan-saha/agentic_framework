@@ -23,7 +23,6 @@ class HostAgent:
             card.name: AgentConnector(card.name, card.url) 
             for card in agent_cards
         }
-        print(f"My connectors: {self.agent_connectors}")
 
         self._agent = self._build_agent()
         self._user_id = "host_agent"

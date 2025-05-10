@@ -26,28 +26,14 @@ BOLD = "\033[1m"
 RED = "\033[0;31m"
 
 
-# -----------------------------------------------------------------------------
-# @click.command(): Turns the function below into a command-line command
-# -----------------------------------------------------------------------------
 @click.command()
 @click.option(
     "--agent", default="http://localhost:10002", help="Base URL of the A2A agent server"
 )
-# ^ This defines the --agent option. It's a string with a default of localhost:10002
-# ^ Used to point to the running agent server (adjust if server runs elsewhere)
-
-
 @click.option("--session", default=0, help="Session ID (use 0 to generate a new one)")
-# ^ This defines the --session option. A session groups multiple tasks together.
-# ^ If user passes 0, we generate a random session ID using uuid4.
-
-
 @click.option(
     "--history", is_flag=True, help="Print full task history after receiving a response"
 )
-# ^ This defines a --history flag (boolean). If passed, full conversation history is shown.
-
-
 async def cli(agent: str, session: str, history: bool):
     """
     CLI to send user messages to an A2A agent and display the response.
@@ -74,10 +60,9 @@ async def cli(agent: str, session: str, history: bool):
         if prompt.strip().lower() in [":q", "quit"]:
             break
 
-        # Construct the payload using the expected JSON-RPC task format
         payload = {
-            "id": uuid4().hex,  # Generate a new unique task ID for this message
-            "sessionId": session_id,  # Reuse or create session ID
+            "id": uuid4().hex,
+            "sessionId": session_id,
             "message": {
                 "role": "user",  # The message is from the user
                 "parts": [
@@ -87,13 +72,14 @@ async def cli(agent: str, session: str, history: bool):
         }
 
         try:
-            # Send the task to the agent and get a structured Task response
             task: Task = await client.send_task(payload)
 
             # Check if the agent responded (expecting at least 2 messages: user + agent)
             if task.history and len(task.history) > 1:
                 reply = task.history[-1]  # Last message is usually from the agent
-                print(f"\n{BOLD}{PURPLE}Agent{RESET}:", reply.parts[0].text)  # Print agent's text reply
+                print(
+                    f"\n{BOLD}{PURPLE}Agent{RESET}:", reply.parts[0].text
+                )  # Print agent's text reply
             else:
                 print("\nNo response received.")
 

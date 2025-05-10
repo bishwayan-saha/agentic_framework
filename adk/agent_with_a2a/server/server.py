@@ -4,27 +4,28 @@
 ## - Let clients discover the agent's details via GET ("/.well-known/agent.json")
 # =============================================================================
 
-from starlette.applications import Starlette
-from starlette.responses import JSONResponse
-from starlette.requests import Request
-from models.agent import AgentCard
-from models.request import A2ARequest, SendTaskRequest
-from models.json_rpc import JSONRPCResponse, InternalError
-from server.task_manager import TaskManager
 import json
 from datetime import datetime
-from fastapi.encoders import jsonable_encoder
+
 import uvicorn
+from fastapi.encoders import jsonable_encoder
+from models.agent import AgentCard
+from models.json_rpc import InternalError, JSONRPCResponse
+from models.request import A2ARequest, SendTaskRequest
+from server.task_manager import TaskManager
+from starlette.applications import Starlette
+from starlette.requests import Request
+from starlette.responses import JSONResponse
 
 
-def json_serializer(obj):
-    """
-    This function can convert Python datetime objects to ISO strings.
-    If you try to serialize a type it doesn't know, it will raise an error.
-    """
-    if isinstance(obj, datetime):
-        return obj.isoformat()
-    raise TypeError(f"Type {type(obj)} not serializable")
+# def json_serializer(obj):
+#     """
+#     This function can convert Python datetime objects to ISO strings.
+#     If you try to serialize a type it doesn't know, it will raise an error.
+#     """
+#     if isinstance(obj, datetime):
+#         return obj.isoformat()
+#     raise TypeError(f"Type {type(obj)} not serializable")
 
 
 class A2AServer:
@@ -48,14 +49,10 @@ class A2AServer:
         self.port = port
         self.agent_card = agent_card
         self.task_manager = task_manager
-
-        # starlette app initialization
         self.app = Starlette()
 
-        # route to handle task requests (JSON-RPC POST)
         self.app.add_route("/", self._handle_request, methods=["POST"])
 
-        # route for agent discovery (agentcard metadata as JSON)
         self.app.add_route(
             "/.well-known/agent.json", self._get_agent_card, methods=["GET"]
         )

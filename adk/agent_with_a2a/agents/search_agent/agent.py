@@ -5,57 +5,21 @@ from google.adk.sessions import InMemorySessionService
 from google.genai import types
 from dotenv import load_dotenv
 from google.adk.runners import Runner
-import praw
-import os
+from google.adk.tools import google_search
 
 load_dotenv()
 
-
-def get_reddit_news(subreddit: str, limit: int = 3) -> dict[str, list[str]]:
-    """
-    Fetches top post titles from a specified subreddit using the Reddit API.
-
-    Args:
-        subreddit: The name of the subreddit to fetch news from.
-        limit: The maximum number of top posts to fetch.
-
-    Returns:
-        A dictionary with the subreddit name as key and a list of
-        post titles as value. Returns an error message if credentials are
-        missing, the subreddit is invalid, or an API error occurs.
-    """
-
-    client_id = os.getenv("REDDIT_CLIENT_ID")
-    client_secret = os.getenv("REDDIT_CLIENT_SECRET")
-    user_agent = os.getenv("REDDIT_USER_AGENT")
-
-    try:
-        reddit = praw.Reddit(
-            client_id=client_id, client_secret=client_secret, user_agent=user_agent
-        )
-        sub_reddit = reddit.subreddit(subreddit)
-        posts = list(sub_reddit.hot(limit=limit))
-        titles = [post.title for post in posts]
-        return {subreddit: titles}
-    except Exception as e:
-        print(f"--- Tool error: Unexpected error for r/{subreddit}: {e} ---")
-        return {
-            subreddit: [
-                f"An unexpected error occurred while fetching from r/{subreddit}."
-            ]
-        }
-
-class RedditAgent:
+class SearchAgent:
 
     SUPPORTED_CONTENT_TYPES = ["text", "text/plain"]
 
     def __init__(self):
         """
-        Initialize the RedditAgent.
+        Initialize the SearchAgent.
         Sets up session handling, memory and runner to execute task
         """
         self._agent = self._build_agent()
-        self._user_id = "remote_reddit_agent"
+        self._user_id = "remote_search_agent"
         ## Runner is used to manage the agent and its environment
         self._runner = Runner(
             app_name=self._agent.name,
@@ -69,28 +33,29 @@ class RedditAgent:
         """Creates and returns an LlmAgent instance"""
         return LlmAgent(
             model="gemini-2.0-flash",
-            name="reddit_agent",
+            name="search_agent",
             description="""A specialized Reddit agent that searches for relevant posts on a given subreddit.""",
             instruction="""
-                You are the Reddit News Scout. Your primary task is to fetch new posts from a given subreddit.
-                1. **Identify Intent:** Determine if the user is asking for any subreddit  news or related topics.
-                2. **Determine Subreddit:** Identify which subreddit(s) to check. If none specified, prompt the user to enter'.
-                3. **Synthesize Output:** Take the exact list of titles returned by the tool.
-                4. **Format Response:** Present the information as a concise, bulleted list. Clearly state which subreddit(s) the information came from. 
-                        If the tool indicates an error or an unknown subreddit, report that message directly.
-                5. **MUST CALL TOOL:** You **MUST** call the `get_reddit_news` tool with the identified subreddit(s).
-                        DO NOT generate random summaries without calling the tool first.""",
-            tools=[get_reddit_news],
+                You are the Google Search Agent. Your primary task is to fetch news and information.
+                1. **Identify Intent:** Determine if the user is asking for any real time information or
+                  if you think it can be found on web / internet.
+                2. **Synthesize Output:** Take all the information both structured or unstructured, returned by the tool.
+                3. **Format Response:** Present the information as bulleted list. Along with the information, provide the link 
+                        of the website from where the information is fetched.If the tool indicates an error 
+                        or unable to understand the query, report that message directly.
+                4. **MUST CALL TOOL:** You **MUST** call the `google_search` built in tool.
+                        DO NOT generate random summaries or DO NOT make any assumptions without calling the tool first.""",
+            tools=[google_search],
         )
 
     def invoke(self, query: str, session_id: str) -> str:
         """
-        Receives a user query about subreddit news and returns a response
+        Receives a user query and returns a response
         Args:
             query (str): The query to be processed
             session_id (str): The session ID for context of grouping messages
         Returns:
-            str: The response (subreddit posts) from the agent
+            str: The response from the agent
         """
         session = self._runner.session_service.get_session(
             app_name=self._agent.name, user_id=self._user_id, session_id=session_id
