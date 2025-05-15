@@ -1,21 +1,30 @@
-from fastapi import FastAPI
-from pydantic import BaseModel, Field
+from fastapi import FastAPI, Depends
+
 from models.task import Task
 from client.client import A2AClient
 from uuid import uuid4
-from app.service import read_json, write_json
-app = FastAPI()
+from app.database.main import Database
+from contextlib import asynccontextmanager
+from app.models.request import Message
+from sqlalchemy.ext.asyncio import AsyncSession
 
-class Message(BaseModel):
-    query: str = Field(..., description="User query to host agent")
-
-class AgentServer(BaseModel):
-    url: str = Field(..., description="URL of agent server")
 
 client = A2AClient(url="http://localhost:10000")
 
-    # Generate a new session ID if not provided (user passed 0)
 session_id = uuid4().hex
+
+database =Database()
+
+creds = {}
+
+@asynccontextmanager
+async def lifespan(api: FastAPI):
+    
+    creds = await database.get_all_credentials()
+    print(creds)
+    yield
+
+app = FastAPI(lifespan=lifespan)
 
 @app.post("/")
 async def get_response(message: Message):
@@ -39,10 +48,10 @@ async def get_response(message: Message):
     except Exception as e:
         print("No No")
 
-@app.post("/register-agent")
-async def register_agent(agentServer: AgentServer):
-    url = agentServer.url
-    data = read_json()
-    data.append(url)
-    write_json(data)    
-    return "server addedd"
+# @app.post("/register-agent")
+# async def register_agent(agentServer: AgentServer):
+#     url = agentServer.url
+#     data = read_json()
+#     data.append(url)
+#     write_json(data)    
+#     return "server addedd"
