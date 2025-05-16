@@ -8,21 +8,17 @@ from urllib.parse import urlparse
 import os
 load_dotenv()
  
-class Database:
 
-    def __init__(self):   
-        
-
-        tmpPostgres = urlparse(os.getenv("DATABASE_URL")) 
-        self._engine = create_async_engine(f"postgresql+asyncpg://{tmpPostgres.username}:{tmpPostgres.password}@{tmpPostgres.hostname}{tmpPostgres.path}?ssl=require", echo=True)
-        # Base.metadata.create_all(bind=self._engine)
-        Session = sessionmaker(bind=self._engine, class_=AsyncSession)
-        self._session = Session()
+tmpPostgres = urlparse(os.getenv("DATABASE_URL")) 
+print(f"postgres url: {tmpPostgres}")
+engine = create_async_engine(f"postgresql+asyncpg://{tmpPostgres.username}:{tmpPostgres.password}@{tmpPostgres.hostname}{tmpPostgres.path}?ssl=require", echo=True)
+# Base.metadata.create_all(bind=engine)
+Session = sessionmaker(bind=engine, class_=AsyncSession)
 
     
-    async def get_all_credentials(self):
-        result = await self._session.execute(select(Credentials_Master))
-        return result.scalars().all()
+# async def get_all_credentials(self):
+#     result = await self._session.execute(select(Credentials_Master))
+#     return result.scalars().all()
     
 
 

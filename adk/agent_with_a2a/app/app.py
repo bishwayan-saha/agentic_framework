@@ -3,26 +3,32 @@ from fastapi import FastAPI, Depends
 from models.task import Task
 from client.client import A2AClient
 from uuid import uuid4
-from app.database.main import Database
+from app.database.main import Session
+from sqlalchemy.orm import sessionmaker #
 from contextlib import asynccontextmanager
 from app.models.request import Message
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import create_async_engine #, AsyncSession
+from sqlalchemy import select
+from app.models.db_model import Credentials_Master
 
 
 client = A2AClient(url="http://localhost:10000")
 
 session_id = uuid4().hex
 
-database =Database()
-
 creds = {}
 
 @asynccontextmanager
 async def lifespan(api: FastAPI):
-    
-    creds = await database.get_all_credentials()
-    print(creds)
+    async with Session() as session:
+        result = await session.execute(select(Credentials_Master))
+        rows = result.fetchall()
+        for row in rows:
+            creds[row[0].credential_name] = row[0].credential_value
+        print(creds)
     yield
+
+
 
 app = FastAPI(lifespan=lifespan)
 

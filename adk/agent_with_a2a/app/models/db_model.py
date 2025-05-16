@@ -9,8 +9,14 @@ class Remote_Agent_Master(Base):
     agent_name = Column(name="AGENT_NAME", type_=String)
     agent_card = Column(name="AGENT_CARD", type_=Text)
 
+   
+
+
 
 class Credentials_Master(Base):
     __tablename__ = "CREDENTIALS_MASTER"
-    credential_name = Column(name="CREDENTIAL_NAME", type_=String, primary_key=True, index=True)
-    credential_value = Column(name="CREDENTIAL_VALUE", type_=Text, nullable=False)
+    credential_name = Column(name="credential_name", type_=String, primary_key=True, index=True)
+    credential_value = Column(name="credential_value", type_=Text, nullable=False)
+
+    def __str__(self):
+        return f"{self.credential_name} -> {self.credential_value}"
