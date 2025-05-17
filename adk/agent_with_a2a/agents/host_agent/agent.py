@@ -1,16 +1,18 @@
+import uuid
 from typing import List
 
+from agents.host_agent.agent_connector import AgentConnector
 from dotenv import load_dotenv
 from google.adk.agents.llm_agent import LlmAgent
 from google.adk.artifacts import InMemoryArtifactService
 from google.adk.memory.in_memory_memory_service import InMemoryMemoryService
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
-from agents.host_agent.agent_connector import AgentConnector
-from models.agent import AgentCard
+from google.adk.tools.function_tool import FunctionTool
 from google.adk.tools.tool_context import ToolContext
 from google.genai import types
-import uuid
+from mcp_connect import MCPConnector
+from models.agent import AgentCard
 
 load_dotenv()
 
@@ -24,6 +26,21 @@ class HostAgent:
             for card in agent_cards
         }
 
+        self._mcp = MCPConnector()
+        mcp_tools= self._mcp.get_tools()
+
+        self._mcp_wrappers = []
+
+        def make_wrapper(tool):
+            async def wrapper(args: dict) -> str:
+                return await tool.run(args)
+            wrapper.__name__ = tool.name
+            return wrapper
+
+        for tool in mcp_tools:
+            fn = make_wrapper(tool)
+            self._mcp_wrappers.append(FunctionTool(fn))
+
         self._agent = self._build_agent()
         self._user_id = "host_agent"
 
@@ -34,6 +51,7 @@ class HostAgent:
             session_service=InMemorySessionService(),
             memory_service=InMemoryMemoryService(),
         )
+        print(f"wrappers {self._mcp_wrappers}")
 
     def _build_agent(self) -> LlmAgent:
         return LlmAgent(
@@ -44,15 +62,19 @@ class HostAgent:
                            """,
             instruction=f"""
                             You are an host manager agent with some tools to help you.
-                            1. list_agents(): List all the agents available to you.
-                            2. delegate_task(agent_name, message): Delegate a task to an agent.
+                            You have two categories of tools available to you
+                            1. A2A Agent tools: There are some tools under this category
+                                1.1-> list_agents(): List all the agents available to you.
+                                1.2-> delegate_task(agent_name, message): Delegate a task to an agent.
+                            2. MCP tools: one FuntionTool per tool name
+                                2.1-> This is an airbnb mcp tool
                             Always use the above tools to help you respond to the user.
-                            DO NOT make any assumptions or hallucinate, if you need more information,
+                            DO NOT make any assumptions or hallucinate; if you need more information,
                               ask the user for clarification.
                             - Available agents (separated by comma): 
                             {", ".join([agent for agent in self.agent_connectors.keys()])}
                         """,
-            tools=[self._list_agents, self._delegate_task]
+            tools=[self._list_agents, self._delegate_task, *self._mcp_wrappers]
         )
     
     def _list_agents(self) -> List[str]:

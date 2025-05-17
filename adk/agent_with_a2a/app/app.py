@@ -1,9 +1,11 @@
-from fastapi import FastAPI
-from pydantic import BaseModel, Field
-from models.task import Task
-from client.client import A2AClient
 from uuid import uuid4
+
 from app.service import read_json, write_json
+from client.client import A2AClient
+from fastapi import FastAPI
+from models.task import Task
+from pydantic import BaseModel, Field
+
 app = FastAPI()
 
 class Message(BaseModel):

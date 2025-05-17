@@ -1,12 +1,14 @@
 
+import json
+from typing import Any
 from uuid import uuid4
+
+import httpx
 from models.agent import AgentCard
 from models.json_rpc import JSONRPCRequest
 from models.request import SendTaskRequest
-from typing import Any
-import httpx, json
-
 from models.task import Task, TaskSendParams
+
 
 class A2AClientHTTPError(Exception):
     """Raised when an HTTP request fails (e.g., bad server response)"""

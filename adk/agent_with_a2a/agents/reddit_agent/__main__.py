@@ -5,12 +5,12 @@
 ## Starts listening on a specific host and port
 # -----------------------------------------------------------------------------
 
-
-from server.server import A2AServer
-from models.agent import AgentCard, AgentCapabilities, AgentSkill
-from agents.reddit_agent.task_manager import RedditAgentTaskManager
+import click
 from agents.reddit_agent.agent import RedditAgent
-import click 
+from agents.reddit_agent.task_manager import RedditAgentTaskManager
+from models.agent import AgentCapabilities, AgentCard, AgentSkill
+from server.server import A2AServer
+
 
 @click.command()
 @click.option("--host", default="localhost", help="Host to bind the server to")

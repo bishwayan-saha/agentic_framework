@@ -1,9 +1,10 @@
-from typing import List
-from models.agent import AgentCard
-import os
 import json
 import logging
+import os
+from typing import List
+
 import httpx
+from models.agent import AgentCard
 
 logger = logging.getLogger(__name__)
 

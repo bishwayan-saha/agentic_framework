@@ -17,7 +17,6 @@ from starlette.applications import Starlette
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
-
 # def json_serializer(obj):
 #     """
 #     This function can convert Python datetime objects to ISO strings.

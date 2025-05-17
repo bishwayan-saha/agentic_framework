@@ -3,9 +3,9 @@
 ## - Ask the agent to respond
 ## - Return the response to the user
 from agents.search_agent.agent import SearchAgent
-from server.task_manager import InMemoryTaskManager
 from models.request import SendTaskRequest, SendTaskResponse
-from models.task import Message, TextPart, TaskStatus
+from models.task import Message, TaskStatus, TextPart
+from server.task_manager import InMemoryTaskManager
 
 
 class SearchAgentTaskManager(InMemoryTaskManager):

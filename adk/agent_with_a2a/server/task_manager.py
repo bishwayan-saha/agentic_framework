@@ -2,23 +2,14 @@
 ## This file defines how tasks are managed in an Agent-to-Agent (A2A) protocol.
 # =============================================================================
 
+import asyncio
 from abc import ABC, abstractmethod
 from typing import Dict
-import asyncio
-from models.request import (
-    SendTaskRequest,
-    SendTaskResponse,
-    GetTaskRequest,
-    GetTaskResponse,
-)
-from models.task import (
-    Task,
-    TaskSendParams,
-    TaskQueryParams,
-    TaskStatus,
-    TaskState,
-    Message,
-)
+
+from models.request import (GetTaskRequest, GetTaskResponse, SendTaskRequest,
+                            SendTaskResponse)
+from models.task import (Message, Task, TaskQueryParams, TaskSendParams,
+                         TaskState, TaskStatus)
 
 
 class TaskManager(ABC):

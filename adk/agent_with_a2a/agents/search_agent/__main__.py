@@ -6,11 +6,12 @@
 # -----------------------------------------------------------------------------
 
 
-from server.server import A2AServer
-from models.agent import AgentCard, AgentCapabilities, AgentSkill
-from agents.search_agent.task_manager import SearchAgentTaskManager
+import click
 from agents.search_agent.agent import SearchAgent
-import click 
+from agents.search_agent.task_manager import SearchAgentTaskManager
+from models.agent import AgentCapabilities, AgentCard, AgentSkill
+from server.server import A2AServer
+
 
 @click.command()
 @click.option("--host", default="localhost", help="Host to bind the server to")

@@ -2,10 +2,11 @@
 ## - Receives a task from the user
 ## - Ask the agent to respond
 ## - Return the response to the user
+
 from agents.reddit_agent.agent import RedditAgent
-from server.task_manager import InMemoryTaskManager
 from models.request import SendTaskRequest, SendTaskResponse
-from models.task import Message, TextPart, TaskStatus
+from models.task import Message, TaskStatus, TextPart
+from server.task_manager import InMemoryTaskManager
 
 
 class RedditAgentTaskManager(InMemoryTaskManager):

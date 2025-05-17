@@ -12,12 +12,12 @@
 # - optional task history printing
 # =============================================================================
 
-import asyncclick as click
 import asyncio
 from uuid import uuid4
+
+import asyncclick as click
 from client.client import A2AClient
 from models.task import Task
-
 
 YELLOW = "\033[1;33m"
 RESET = "\033[0m"

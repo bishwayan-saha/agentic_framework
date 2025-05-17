@@ -1,11 +1,12 @@
 # =============================================================================
 ## This file defines task related models used in A2A protocol
 # =============================================================================
-from enum import Enum                          
-from uuid import uuid4                         
-from pydantic import BaseModel, Field          
-from typing import Any, Literal, List          
 from datetime import datetime
+from enum import Enum
+from typing import Any, List, Literal
+from uuid import uuid4
+
+from pydantic import BaseModel, Field
 
 
 # Represents one part of a message, currently only plain text is allowed

@@ -2,12 +2,12 @@
 # This module defines structured request models used in the A2A  protocol.
 # =============================================================================
 
-from typing import Annotated, Union, Literal 
+from typing import Annotated, Literal, Union
+
+from models.json_rpc import JSONRPCRequest, JSONRPCResponse
+from models.task import Task, TaskQueryParams, TaskSendParams
 from pydantic import Field
 from pydantic.type_adapter import TypeAdapter
-from models.json_rpc import JSONRPCRequest, JSONRPCResponse
-from models.task import Task, TaskSendParams
-from models.task import TaskQueryParams
 
 
 class SendTaskRequest(JSONRPCRequest):
