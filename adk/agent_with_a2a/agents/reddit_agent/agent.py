@@ -8,7 +8,8 @@ from google.adk.runners import Runner
 import praw
 from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset, StdioServerParameters
 import os
-import asyncio
+from utils.cache import credentials_cache
+
 
 load_dotenv()
 
@@ -46,28 +47,6 @@ def get_reddit_news(subreddit: str, limit: int = 3) -> dict[str, list[str]]:
                 f"An unexpected error occurred while fetching from r/{subreddit}."
             ]
         }
-    
-async def get_tools_async():
-    print("--- Attempting to start and connect to mcp-reddit MCP server via uvx ---")
-    tools, exit_stack = await MCPToolset.from_server(
-        connection_params = StdioServerParameters(
-            command="uvx",
-            args=["--from", "git+https://github.com/adhikasp/mcp-reddit.git", "mcp-reddit"]
-        )
-    )
-
-    print("--- Loaded tools ---")
-    for tool in tools:
-        print(f"--- Loaded tool: {tool.name} ---")
-
-    return tools, exit_stack
-
-def get_the_tools():
-    print("--- Please Loaded tools ---")
-    
-    tools, exit_stack =  asyncio.run(get_tools_async())
-    exit_stack.aclose()
-    return tools
 
 class RedditAgent:
 
@@ -78,8 +57,9 @@ class RedditAgent:
         Initialize the RedditAgent.
         Sets up session handling, memory and runner to execute task
         """
-        self._tools = get_the_tools()
-        self._agent = self._build_agent(self._tools)
+        
+        print(f"creds {credentials_cache}")
+        self._agent = self._build_agent()
         self._user_id = "remote_reddit_agent"
         ## Runner is used to manage the agent and its environment
         self._runner = Runner(
@@ -90,7 +70,7 @@ class RedditAgent:
             memory_service=InMemoryMemoryService(),  # Optional: remembers past messages
         )
 
-    def _build_agent(self, tools) -> LlmAgent:
+    def _build_agent(self) -> LlmAgent:
         """Creates and returns an LlmAgent instance"""
         return LlmAgent(
             model="gemini-2.0-flash",
@@ -105,7 +85,7 @@ class RedditAgent:
                         If the tool indicates an error or an unknown subreddit, report that message directly.
                 5. **MUST CALL TOOL:** You **MUST** call the `get_reddit_news` tool with the identified subreddit(s).
                         DO NOT generate random summaries without calling the tool first.""",
-            tools=tools,
+            tools=[get_reddit_news],
         )
 
     def invoke(self, query: str, session_id: str) -> str:

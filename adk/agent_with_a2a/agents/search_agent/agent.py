@@ -6,21 +6,10 @@ from google.genai import types
 from dotenv import load_dotenv
 from google.adk.runners import Runner
 from google.adk.tools import google_search
-from app.app import creds
 import os
 
 load_dotenv()
-#print(creds)
 
-print(os.getenv("GOOGLE_API_KEY"))
-
-if "GOOGLE_API_KEY" in creds:
-    os.environ["GOOGLE_API_KEY"] = creds.get("GOOGLE_API_KEY")
-else:
-    print("GOOGLE_API_KEY not in creds")
-
-
-#os.environ["GOOGLE_API_KEY"] = creds.get("GOOGLE_API_KEY")
 class SearchAgent:
 
     SUPPORTED_CONTENT_TYPES = ["text", "text/plain"]

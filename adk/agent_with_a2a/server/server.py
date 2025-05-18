@@ -5,9 +5,7 @@
 # =============================================================================
 
 import json
-from datetime import datetime
 
-import uvicorn
 from fastapi.encoders import jsonable_encoder
 from models.agent import AgentCard
 from models.json_rpc import InternalError, JSONRPCResponse
@@ -16,16 +14,6 @@ from server.task_manager import TaskManager
 from starlette.applications import Starlette
 from starlette.requests import Request
 from starlette.responses import JSONResponse
-
-
-# def json_serializer(obj):
-#     """
-#     This function can convert Python datetime objects to ISO strings.
-#     If you try to serialize a type it doesn't know, it will raise an error.
-#     """
-#     if isinstance(obj, datetime):
-#         return obj.isoformat()
-#     raise TypeError(f"Type {type(obj)} not serializable")
 
 
 class A2AServer:
@@ -65,7 +53,7 @@ class A2AServer:
         """
         if not self.agent_card or not self.task_manager:
             raise ValueError("Agent card and task manager are required")
-
+        import uvicorn
         uvicorn.run(self.app, host=self.host, port=self.port)
 
     # Return the agent’s metadata (GET request)
