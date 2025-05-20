@@ -5,7 +5,7 @@ import os
 class MCPToolDiscovery:
 
     def __init__(self, config_file: str) -> None:
-        
+
         if config_file:
             self._config_file = config_file
         else:
@@ -13,7 +13,7 @@ class MCPToolDiscovery:
                 os.path.dirname(__file__), "mcp_config.json"
             )
         self._config = self._load_config()
-    
+
     def _load_config(self):
         try:
             with open(self._config_file, "r") as file:

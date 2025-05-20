@@ -24,12 +24,12 @@ class TaskManager(ABC):
 
     @abstractmethod
     async def on_send_task(self, request: SendTaskRequest) -> SendTaskResponse:
-        """ This method will handle new incoming tasks."""
+        """This method will handle new incoming tasks."""
         pass
 
     @abstractmethod
     async def on_get_task(self, request: GetTaskRequest) -> GetTaskResponse:
-        """ This method will return task details by task ID."""
+        """This method will return task details by task ID."""
         pass
 
 

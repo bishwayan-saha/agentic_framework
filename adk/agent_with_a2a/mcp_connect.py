@@ -1,4 +1,3 @@
-
 import asyncio
 
 from mcp import ClientSession, StdioServerParameters
@@ -8,14 +7,13 @@ from mcp_discover import MCPToolDiscovery
 
 class MCPTool:
 
-    def __init__(self, name, description, input_schema, server_cmd, server_args) -> None:
+    def __init__(
+        self, name, description, input_schema, server_cmd, server_args
+    ) -> None:
         self.name = name
         self._description = description
         self._input_schema = input_schema
-        self._params = StdioServerParameters(
-            command= server_cmd,
-            args= server_args
-        )
+        self._params = StdioServerParameters(command=server_cmd, args=server_args)
 
     async def run(self, args: dict):
         async with stdio_client(self._params) as (read_stream, write_stream):
@@ -23,7 +21,8 @@ class MCPTool:
                 await session.initialize()
                 response = await session.call_tool(self.name, args)
                 return getattr(response, "content", str(response))
-            
+
+
 class MCPConnector:
 
     def __init__(self, config_file: str = None) -> None:
@@ -42,7 +41,7 @@ class MCPConnector:
                 params = StdioServerParameters(command=command, args=args)
 
                 try:
-                    async with stdio_client(params) as (read_stream ,write_stream):
+                    async with stdio_client(params) as (read_stream, write_stream):
                         async with ClientSession(read_stream, write_stream) as session:
                             await session.initialize()
 
@@ -51,7 +50,7 @@ class MCPConnector:
                             for tool in tools:
                                 self._tools.append(
                                     MCPTool(
-                                        name= tool.name,
+                                        name=tool.name,
                                         description=tool.description,
                                         input_schema=tool.inputSchema,
                                         server_args=args,
@@ -60,8 +59,8 @@ class MCPConnector:
                                 )
                 except Exception as e:
                     print("Some exception")
+
         asyncio.run(_fetch())
 
     def get_tools(self):
         return self._tools.copy()
-        
